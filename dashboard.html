@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard — SafeNet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080b12;--bg2:#0e1420;--bg3:#141b28;--card:#0f1620;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--violet:#7c5cfc;--violet2:rgba(124,92,252,0.1);--teal:#00e5c8;--teal2:rgba(0,229,200,0.08);--red:#ff3d5a;--red2:rgba(255,61,90,0.1);--amber:#ffb020;--amber2:rgba(255,176,32,0.1);--green:#00d48c;--green2:rgba(0,212,140,0.08);--text:#f0f4ff;--text2:#8492b0;--text3:#3d4d6a;--r:13px}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+h1,h2,h3{font-family:'Cabinet Grotesk',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--violet);border-radius:2px}
+
+.sb{width:238px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:14px;display:flex;align-items:center;gap:9px;text-decoration:none}
+.sb-lm{width:32px;height:32px;background:linear-gradient(135deg,var(--violet),#5b3dd9);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.sb-lm svg{width:17px;height:17px}
+.sb-ln{font-family:'Cabinet Grotesk',sans-serif;font-size:16px;font-weight:900;color:var(--text)}
+.sb-ln span{color:var(--violet)}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 18px 3px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:10px 18px;cursor:pointer;font-size:13px;color:var(--text2);transition:.15s;border-right:3px solid transparent;text-decoration:none}
+.sb-item:hover{background:rgba(124,92,252,0.04);color:var(--text)}
+.sb-item.active{background:var(--violet2);color:var(--violet);font-weight:600;border-right-color:var(--violet)}
+.sb-item .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:2px 6px;border-radius:100px;font-weight:700}
+.sb-bottom{margin-top:auto;padding:14px}
+.sb-user{display:flex;align-items:center;gap:9px;background:var(--bg3);border-radius:10px;padding:10px 12px;cursor:pointer}
+.sb-av{width:30px;height:30px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:12px;color:#fff;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:600;color:var(--text)}
+.sb-urole{font-size:10px;color:var(--text2)}
+.sb-logout{width:100%;margin-top:8px;background:none;border:1px solid var(--border2);color:var(--text2);padding:7px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Instrument Sans',sans-serif;transition:.2s}
+.sb-logout:hover{border-color:var(--red);color:var(--red)}
+
+.main{flex:1;overflow-y:auto;padding:28px 30px}
+.page{display:none}.page.active{display:block}
+.page-title{font-size:20px;font-weight:900;letter-spacing:-.5px;margin-bottom:20px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;border-top:2px solid var(--sc,var(--violet))}
+.sc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:7px}
+.sc-val{font-family:'Cabinet Grotesk',sans-serif;font-size:26px;font-weight:900;line-height:1}
+.sc-sub{font-size:10px;color:var(--text3);margin-top:3px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.card-title{font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:800;margin-bottom:13px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(124,92,252,0.02)}
+
+.badge{padding:3px 8px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase}
+.b-safe{background:var(--green2);color:var(--green)}
+.b-low{background:var(--teal2);color:var(--teal)}
+.b-moderate{background:var(--amber2);color:var(--amber)}
+.b-severe,.b-critical{background:var(--red2);color:var(--red)}
+.b-open{background:var(--amber2);color:var(--amber)}
+.b-resolved{background:var(--green2);color:var(--green)}
+.b-closed{background:rgba(255,255,255,.05);color:var(--text2)}
+
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:6px}
+.fc{width:100%;padding:10px 12px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:9px;color:var(--text);font-size:13px;font-family:'Instrument Sans',sans-serif;outline:none;transition:.2s}
+.fc:focus{border-color:var(--violet)}
+textarea.fc{resize:vertical;min-height:80px}
+select.fc option{background:var(--bg3)}
+
+.btn{padding:8px 16px;border-radius:9px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:6px;letter-spacing:-.2px}
+.btn-violet{background:var(--violet);color:#fff}.btn-violet:hover{background:#6a4edb}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}.btn-ghost:hover{color:var(--text)}
+.btn-red{background:var(--red2);color:var(--red);border:1px solid rgba(255,61,90,.2)}.btn-red:hover{background:rgba(255,61,90,.2)}
+.btn-full{width:100%;justify-content:center;padding:12px}
+
+.chat-wrap{display:flex;flex-direction:column;height:420px}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.chat-bubble{max-width:82%;padding:10px 14px;border-radius:13px;font-size:13px;line-height:1.6}
+.chat-user{align-self:flex-end;background:var(--violet);color:#fff;border-radius:13px 13px 4px 13px}
+.chat-ai{align-self:flex-start;background:var(--bg3);color:var(--text);border-radius:13px 13px 13px 4px;border:1px solid var(--border2)}
+.chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+
+.score-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:2px}
+.score-track{background:var(--bg3);border-radius:100px;height:4px;margin-bottom:7px;overflow:hidden}
+.score-fill{height:100%;border-radius:100px;transition:width .6s ease}
+
+.notif-item{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.notif-item:last-child{border-bottom:none}
+.nd{width:7px;height:7px;border-radius:50%;background:var(--violet);flex-shrink:0;margin-top:5px}
+.nd.read{background:var(--text3)}
+
+.alert{padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:12px;border:1px solid}
+.alert-ok{background:var(--green2);border-color:rgba(0,212,140,.25);color:var(--green)}
+.alert-err{background:var(--red2);border-color:rgba(255,61,90,.25);color:var(--red)}
+.alert-info{background:var(--violet2);border-color:rgba(124,92,252,.25);color:var(--violet)}
+
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--violet);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:28px;color:var(--text2);font-size:13px}
+.res-card{background:var(--bg3);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.res-card:hover{background:var(--card)}
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}
+@media(max-width:640px){.sb{display:none}.main{padding:16px}}
+</style>
+</head>
+<body>
+<aside class="sb">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-lm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+    <span class="sb-ln">Safe<span>Net</span></span>
+  </a>
+  <div class="sb-item active" data-page="overview" onclick="showPage('overview')"><span class="ic">📊</span> Overview</div>
+  <div class="sb-sec">Detection</div>
+  <div class="sb-item" data-page="detect" onclick="showPage('detect')"><span class="ic">🔍</span> Analyze content</div>
+  <div class="sb-item" data-page="history" onclick="showPage('history')"><span class="ic">📁</span> Detection history</div>
+  <div class="sb-sec">Support</div>
+  <div class="sb-item" data-page="report" onclick="showPage('report')"><span class="ic">📋</span> File a report</div>
+  <div class="sb-item" data-page="reports" onclick="showPage('reports')"><span class="ic">📂</span> My reports</div>
+  <div class="sb-item" data-page="chat" onclick="showPage('chat')"><span class="ic">💬</span> AI support chat</div>
+  <div class="sb-item" data-page="resources" onclick="showPage('resources')"><span class="ic">📚</span> Resources</div>
+  <div class="sb-item" data-page="notifs" onclick="showPage('notifs')"><span class="ic">🔔</span> Notifications <span class="sb-badge" id="notifBadge" style="display:none">0</span></div>
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="showPage('profile')">
+      <div class="sb-av" id="sbAv">?</div>
+      <div><div class="sb-uname" id="sbName">...</div><div class="sb-urole">User</div></div>
+    </div>
+    <button class="sb-logout" onclick="doLogout()">Sign out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div class="page-title">Overview</div>
+    <div class="stats-grid">
+      <div class="stat" style="--sc:var(--violet)"><div class="sc-lbl">Analyses run</div><div class="sc-val" id="st-det">—</div><div class="sc-sub">Total content checked</div></div>
+      <div class="stat" style="--sc:var(--red)"><div class="sc-lbl">Harmful found</div><div class="sc-val" id="st-harm">—</div><div class="sc-sub">Flagged as risky</div></div>
+      <div class="stat" style="--sc:var(--amber)"><div class="sc-lbl">Reports filed</div><div class="sc-val" id="st-rep">—</div><div class="sc-sub">Incidents reported</div></div>
+      <div class="stat" style="--sc:var(--red)"><div class="sc-lbl">Critical cases</div><div class="sc-val" id="st-crit">—</div><div class="sc-sub">Highest severity</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;margin-bottom:12px">Recent detections</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <table class="tbl"><thead><tr><th>Content</th><th>Verdict</th><th>Date</th></tr></thead><tbody id="ovDet"></tbody></table>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;margin-bottom:12px">Recent reports</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <table class="tbl"><thead><tr><th>Type</th><th>Platform</th><th>Status</th></tr></thead><tbody id="ovRep"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETECT -->
+  <div class="page" id="page-detect">
+    <div class="page-title">Analyze content</div>
+    <div class="card">
+      <div class="card-title">AI Cyberbullying Detector</div>
+      <div class="fg">
+        <label>Platform</label>
+        <select class="fc" id="detPlatform">
+          <option>Instagram</option><option>Twitter/X</option><option>TikTok</option><option>WhatsApp</option><option>YouTube</option><option>Discord</option><option>Facebook</option><option>Snapchat</option><option>Other</option>
+        </select>
+      </div>
+      <div class="fg"><label>Content to analyze</label><textarea class="fc" id="detContent" style="min-height:110px" placeholder="Paste any message, comment, post, caption or DM you want to check for cyberbullying..."></textarea></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-violet" onclick="runDetect()">Analyze with AI →</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('detContent').value='You are pathetic and worthless. Everyone hates you and wishes you never existed. You should disappear.'">Sample: bullying</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('detContent').value='I know where you go to school. Keep posting and I will make your life hell. You have been warned.'">Sample: threat</button>
+      </div>
+      <div id="detResult" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="page-title" style="margin-bottom:0">Detection history</div>
+      <button class="btn btn-violet" onclick="showPage('detect')">+ New analysis</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+      <table class="tbl"><thead><tr><th>Content preview</th><th>Verdict</th><th>Platform</th><th>Severity</th><th>Date</th></tr></thead><tbody id="histBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="page" id="page-report">
+    <div class="page-title">File an incident report</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Incident details</div>
+        <div id="repAlert"></div>
+        <div class="fg"><label>Incident type</label>
+          <select class="fc" id="repType">
+            <option>Cyberbullying</option><option>Harassment campaign</option><option>Doxxing</option><option>Death threat</option><option>Sexual harassment</option><option>Hate speech</option><option>Impersonation</option><option>Coordinated attack</option><option>Sextortion</option><option>Public shaming</option>
+          </select>
+        </div>
+        <div class="fg"><label>Platform</label>
+          <select class="fc" id="repPlatform">
+            <option>Instagram</option><option>Twitter/X</option><option>TikTok</option><option>WhatsApp</option><option>YouTube</option><option>Discord</option><option>Facebook</option><option>Snapchat</option><option>Email</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg"><label>Who is being targeted? (optional)</label><input class="fc" id="repVictim" placeholder="Yourself, a friend, your child..."></div>
+        <div class="fg"><label>What happened?</label><textarea class="fc" id="repDesc" style="min-height:90px" placeholder="Describe the incident..."></textarea></div>
+        <div class="fg"><label>Evidence (URLs, quotes, screenshot descriptions)</label><textarea class="fc" id="repEvid" style="min-height:60px" placeholder="Paste evidence..."></textarea></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><input type="checkbox" id="repAnon" style="width:auto"><label for="repAnon" style="font-size:13px;color:var(--text2)">Submit anonymously</label></div>
+        <button class="btn btn-violet btn-full" onclick="submitReport()">Submit report →</button>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">Track existing report</div>
+          <div class="fg"><label>Reference number</label><input class="fc" id="trackRef" placeholder="e.g. SN-ABC123"></div>
+          <button class="btn btn-ghost btn-full" onclick="trackReport()">Track status</button>
+          <div id="trackResult" style="margin-top:12px"></div>
+        </div>
+        <div class="card" style="margin-top:14px;border-color:rgba(255,61,90,.2)">
+          <div class="card-title" style="color:var(--red)">🆘 Emergency resources</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8">
+            <div><strong style="color:var(--text)">Crisis Text Line:</strong> Text HOME to 741741</div>
+            <div><strong style="color:var(--text)">Suicide Prevention:</strong> Call 988</div>
+            <div><strong style="color:var(--text)">Emergency:</strong> Call 911 or local services</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY REPORTS -->
+  <div class="page" id="page-reports">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="page-title" style="margin-bottom:0">My reports</div>
+      <button class="btn btn-violet" onclick="showPage('report')">+ New report</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+      <table class="tbl"><thead><tr><th>Ref #</th><th>Type</th><th>Platform</th><th>Status</th><th>Priority</th><th>Filed</th></tr></thead><tbody id="myRepBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="page" id="page-chat">
+    <div class="page-title">AI support chat</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;background:var(--violet);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px">🤖</div>
+        <div><div style="font-weight:600;font-size:14px">SafeNet AI Counselor</div><div style="font-size:11px;color:var(--green)">● Online 24/7</div></div>
+        <button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:5px 10px" onclick="clearChat()">Clear</button>
+      </div>
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="chat-bubble chat-ai">Hi, I'm here for you. Whether you're experiencing cyberbullying, harassment or just need to talk through a difficult online situation — I'm listening. How can I help?</div>
+      </div>
+      <div class="chat-input-row">
+        <input class="fc" id="chatInput" placeholder="Ask anything about online safety..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}" style="flex:1;margin:0">
+        <button class="btn btn-violet" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn btn-ghost" style="font-size:11px" onclick="quickChat('Someone is threatening me online. What should I do?')">Someone is threatening me</button>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="quickChat('How do I report cyberbullying on Instagram?')">Report on Instagram</button>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="quickChat('I am feeling overwhelmed by online harassment')">I need emotional support</button>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="quickChat('What are my legal options against cyberbullying?')">Legal options</button>
+    </div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="page" id="page-resources">
+    <div class="page-title">Safety resources</div>
+    <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap" id="resFilters">
+      <button class="btn btn-violet" onclick="filterRes('all',this)">All</button>
+      <button class="btn btn-ghost" onclick="filterRes('crisis',this)">Crisis</button>
+      <button class="btn btn-ghost" onclick="filterRes('education',this)">Education</button>
+      <button class="btn btn-ghost" onclick="filterRes('support',this)">Support</button>
+      <button class="btn btn-ghost" onclick="filterRes('reporting',this)">Reporting</button>
+      <button class="btn btn-ghost" onclick="filterRes('prevention',this)">Prevention</button>
+    </div>
+    <div id="resList"></div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="page" id="page-notifs">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="page-title" style="margin-bottom:0">Notifications</div>
+      <button class="btn btn-ghost" onclick="markRead()">Mark all read</button>
+    </div>
+    <div class="card"><div id="notifList"></div></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="page-profile">
+    <div class="page-title">Profile settings</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Personal info</div>
+        <div class="fg"><label>Full name</label><input class="fc" id="pName"></div>
+        <div class="fg"><label>Bio (optional)</label><textarea class="fc" id="pBio" style="min-height:70px" placeholder="A short bio..."></textarea></div>
+        <button class="btn btn-violet btn-full" onclick="saveProfile()">Save changes</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Change password</div>
+        <div class="fg"><label>Current password</label><input class="fc" id="pCur" type="password" placeholder="••••••••"></div>
+        <div class="fg"><label>New password</label><input class="fc" id="pNew" type="password" placeholder="Min 8 characters"></div>
+        <div class="fg"><label>Confirm new</label><input class="fc" id="pConf" type="password" placeholder="Repeat"></div>
+        <button class="btn btn-ghost btn-full" onclick="changePass()">Update password</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = window.location.origin;
+let currentUser = null, allResources = [], chatHistory = [];
+
+function token() { return localStorage.getItem('sn_token'); }
+function goLogin() { localStorage.removeItem('sn_token'); localStorage.removeItem('sn_user'); window.location.replace('login.html'); }
+
+async function apiFetch(url, opts={}) {
+  const r = await fetch(API+url, { headers:{'Content-Type':'application/json','Authorization':'Bearer '+token()}, ...opts });
+  if (r.status===401||r.status===403) { goLogin(); return; }
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error||'Request failed');
+  return d;
+}
+
+const kd = s => s ? new Date(s).toLocaleDateString('en',{month:'short',day:'numeric'}) : '—';
+const trunc = (s,n=50) => s&&s.length>n?s.slice(0,n)+'…':(s||'');
+
+function toast(msg,type='ok') {
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;padding:12px 18px;border-radius:10px;font-size:13px;font-family:Instrument Sans,sans-serif;max-width:300px;transition:.3s;opacity:0;transform:translateY(20px)';
+  t.style.background=type==='ok'?'rgba(0,212,140,.15)':'rgba(255,61,90,.15)';
+  t.style.border=`1px solid ${type==='ok'?'rgba(0,212,140,.3)':'rgba(255,61,90,.3)'}`;
+  t.style.color=type==='ok'?'#00d48c':'#ff3d5a';
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='1';t.style.transform='translateY(0)'},10);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),300)},4000);
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.toggle('active',s.dataset.page===name));
+  const map={overview:loadOverview,'history':loadHistory,'reports':loadReports,resources:loadResources,notifs:loadNotifs};
+  if(map[name]) map[name]();
+}
+
+function doLogout() { goLogin(); }
+
+// INIT
+async function init() {
+  if (!token()) { window.location.replace('login.html'); return; }
+  try {
+    currentUser = await apiFetch('/api/auth/me');
+    if (!currentUser) { goLogin(); return; }
+    document.getElementById('sbAv').textContent = (currentUser.name||'U')[0].toUpperCase();
+    document.getElementById('sbName').textContent = currentUser.name||'User';
+    if (document.getElementById('pName')) document.getElementById('pName').value = currentUser.name||'';
+    if (document.getElementById('pBio'))  document.getElementById('pBio').value  = currentUser.bio||'';
+    await loadOverview();
+    loadNotifs();
+  } catch(e) { goLogin(); }
+}
+
+// OVERVIEW
+async function loadOverview() {
+  try {
+    const d = await apiFetch('/api/user/dashboard');
+    const s = d.stats||{};
+    document.getElementById('st-det').textContent  = s.totalDetections||0;
+    document.getElementById('st-harm').textContent = s.harmfulDetected||0;
+    document.getElementById('st-rep').textContent  = s.reportsField||0;
+    document.getElementById('st-crit').textContent = s.criticalFound||0;
+    const vm={safe:'b-safe',low_risk:'b-low',moderate:'b-moderate',severe:'b-severe',critical:'b-critical'};
+    document.getElementById('ovDet').innerHTML=(d.detections||[]).slice(0,5).map(a=>`<tr><td style="color:var(--text2)">${trunc(a.content,45)}</td><td><span class="badge ${vm[a.verdict]||'b-low'}">${(a.verdict||'').replace('_',' ')}</span></td><td style="color:var(--text2)">${kd(a.createdAt)}</td></tr>`).join('')||`<tr><td colspan="3" class="empty"><a href="#" onclick="showPage('detect');return false" style="color:var(--violet)">Run your first analysis</a></td></tr>`;
+    const sm={open:'b-open',resolved:'b-resolved',closed:'b-closed'};
+    document.getElementById('ovRep').innerHTML=(d.reports||[]).slice(0,5).map(r=>`<tr><td>${trunc(r.incidentType,24)}</td><td style="color:var(--text2)">${r.platform}</td><td><span class="badge ${sm[r.status]||'b-open'}">${r.status}</span></td></tr>`).join('')||`<tr><td colspan="3" class="empty"><a href="#" onclick="showPage('report');return false" style="color:var(--violet)">File your first report</a></td></tr>`;
+    const unread=(d.notifications||[]).filter(n=>!n.read).length;
+    const b=document.getElementById('notifBadge'); b.textContent=unread; b.style.display=unread>0?'inline':'none';
+  } catch(e) { console.error(e); }
+}
+
+// DETECT
+async function runDetect() {
+  const content=document.getElementById('detContent').value.trim();
+  const platform=document.getElementById('detPlatform').value;
+  if (!content) { toast('Paste some content to analyze','err'); return; }
+  const resultEl=document.getElementById('detResult');
+  resultEl.innerHTML='<div style="font-size:13px;color:var(--text2);padding:8px 0"><span class="spinner"></span>Analyzing with AI...</div>';
+  try {
+    const d = await apiFetch('/api/detect',{method:'POST',body:JSON.stringify({content,platform})});
+    renderDetectResult(d,resultEl);
+  } catch(e) { resultEl.innerHTML=`<div class="alert alert-err">${e.message}</div>`; }
+}
+
+function renderDetectResult(d,el) {
+  const vm={safe:'b-safe',low_risk:'b-low',moderate:'b-moderate',severe:'b-severe',critical:'b-critical'};
+  const vl={safe:'Safe',low_risk:'Low risk',moderate:'Moderate risk',severe:'Severe',critical:'Critical'};
+  const cats=d.categories||{};
+  const bars=Object.entries(cats).map(([k,v])=>{
+    const col=v>70?'#ff3d5a':v>40?'#ffb020':'#00d48c';
+    return `<div><div class="score-row"><span style="text-transform:capitalize">${k.replace(/_/g,' ')}</span><span>${v}%</span></div><div class="score-track"><div class="score-fill" style="width:${v}%;background:${col}"></div></div></div>`;
+  }).join('');
+  const flags=(d.flags||[]).map(f=>`<span style="display:inline-block;background:var(--amber2);color:var(--amber);border:1px solid rgba(255,176,32,.2);padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin:2px">${f}</span>`).join('');
+  const mit=d.mitigation||{};
+  el.innerHTML=`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:18px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="badge ${vm[d.verdict]||'b-low'}" style="font-size:12px;padding:5px 12px">${vl[d.verdict]||d.verdict}</span>
+        ${d.confidence?`<span style="font-size:12px;color:var(--text2)">${d.confidence}% confidence</span>`:''}
+      </div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px">${d.explanation||''}</p>
+      ${bars}
+      ${flags?`<div style="margin-top:8px">${flags}</div>`:''}
+      ${d.victim_impact?`<div style="margin-top:10px;background:var(--red2);border:1px solid rgba(255,61,90,.15);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--red)"><strong>Victim impact:</strong> ${d.victim_impact}</div>`:''}
+      ${d.counter_narrative?`<div style="margin-top:8px;background:var(--violet2);border:1px solid rgba(124,92,252,.15);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--violet)"><strong>Counter-narrative:</strong> ${d.counter_narrative}</div>`:''}
+      ${mit.immediate?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text);margin-bottom:7px">Immediate actions</div><ul style="font-size:12px;color:var(--text2);padding-left:16px;line-height:1.8">${mit.immediate.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:''}
+      ${mit.platform_report?`<div style="margin-top:10px;font-size:12px;color:var(--text2)"><strong style="color:var(--text)">Platform reporting:</strong> ${mit.platform_report}</div>`:''}
+      ${d.should_report?`<button class="btn btn-red" style="margin-top:12px;font-size:12px" onclick="showPage('report')">File incident report →</button>`:''}
+    </div>`;
+}
+
+// HISTORY
+async function loadHistory() {
+  try {
+    const rows = await apiFetch('/api/detections');
+    const vm={safe:'b-safe',low_risk:'b-low',moderate:'b-moderate',severe:'b-severe',critical:'b-critical'};
+    const sl={none:'b-safe',low:'b-low',medium:'b-moderate',high:'b-severe',extreme:'b-critical'};
+    document.getElementById('histBody').innerHTML=rows.length?rows.map(d=>`<tr>
+      <td style="color:var(--text2);max-width:200px">${trunc(d.content,55)}</td>
+      <td><span class="badge ${vm[d.verdict]||'b-low'}">${(d.verdict||'').replace('_',' ')}</span></td>
+      <td style="color:var(--text2)">${d.platform||'—'}</td>
+      <td><span class="badge ${sl[d.severity]||'b-low'}">${d.severity||'—'}</span></td>
+      <td style="color:var(--text2)">${kd(d.createdAt)}</td>
+    </tr>`).join(''):`<tr><td colspan="5" class="empty">No analyses yet</td></tr>`;
+  } catch(e) { console.error(e); }
+}
+
+// REPORT
+async function submitReport() {
+  const incidentType=document.getElementById('repType').value, platform=document.getElementById('repPlatform').value;
+  const description=document.getElementById('repDesc').value.trim(), evidence=document.getElementById('repEvid').value.trim();
+  const anonymous=document.getElementById('repAnon').checked, targetVictim=document.getElementById('repVictim').value.trim();
+  const alertEl=document.getElementById('repAlert');
+  if (!description){alertEl.innerHTML='<div class="alert alert-err">Please describe what happened.</div>';return;}
+  alertEl.innerHTML='<div class="alert alert-info"><span class="spinner"></span>Filing report and getting AI guidance...</div>';
+  try {
+    const d=await apiFetch('/api/reports',{method:'POST',body:JSON.stringify({incidentType,platform,description,evidence,anonymous,targetVictim})});
+    alertEl.innerHTML=`<div class="alert alert-ok"><strong>Report filed — Ref: ${d.refNumber}</strong><br><div style="margin-top:8px;font-size:12px;white-space:pre-wrap;line-height:1.6">${d.guidance}</div></div>`;
+    document.getElementById('repDesc').value=''; document.getElementById('repEvid').value='';
+    loadOverview();
+  } catch(e){alertEl.innerHTML=`<div class="alert alert-err">${e.message}</div>`;}
+}
+
+async function trackReport() {
+  const ref=document.getElementById('trackRef').value.trim().toUpperCase();
+  if(!ref)return;
+  try {
+    const d=await apiFetch(`/api/reports/track/${ref}`);
+    const sm={open:'b-open',resolved:'b-resolved',closed:'b-closed'};
+    document.getElementById('trackResult').innerHTML=`<div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:13px"><div style="margin-bottom:6px"><strong>${d.refNumber}</strong> <span class="badge ${sm[d.status]||'b-open'}">${d.status}</span></div><div style="color:var(--text2)">${d.incidentType} · ${d.platform}<br>Filed: ${kd(d.createdAt)}</div></div>`;
+  } catch(e){document.getElementById('trackResult').innerHTML=`<div class="alert alert-err">Report not found: ${ref}</div>`;}
+}
+
+// MY REPORTS
+async function loadReports() {
+  try {
+    const rows=await apiFetch('/api/reports');
+    const sm={open:'b-open',resolved:'b-resolved',closed:'b-closed'}, pm={low:'b-safe',medium:'b-moderate',high:'b-severe'};
+    document.getElementById('myRepBody').innerHTML=rows.length?rows.map(r=>`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--violet)">${r.refNumber}</td>
+      <td>${trunc(r.incidentType,24)}</td>
+      <td style="color:var(--text2)">${r.platform}</td>
+      <td><span class="badge ${sm[r.status]||'b-open'}">${r.status}</span></td>
+      <td><span class="badge ${pm[r.priority]||'b-moderate'}">${r.priority||'medium'}</span></td>
+      <td style="color:var(--text2)">${kd(r.createdAt)}</td>
+    </tr>`).join(''):`<tr><td colspan="6" class="empty">No reports yet</td></tr>`;
+  } catch(e){}
+}
+
+// CHAT
+async function sendChat() {
+  const input=document.getElementById('chatInput'), msg=input.value.trim();
+  if(!msg)return; input.value='';
+  addBubble(msg,'user'); chatHistory.push({role:'user',content:msg});
+  const typing=addBubble('...','ai');
+  try {
+    const d=await apiFetch('/api/chat',{method:'POST',body:JSON.stringify({message:msg,history:chatHistory})});
+    typing.remove(); addBubble(d.reply,'ai'); chatHistory.push({role:'assistant',content:d.reply});
+  } catch(e){typing.textContent='Sorry, I could not process that. Please try again.';}
+}
+function addBubble(text,role){const el=document.createElement('div');el.className=`chat-bubble chat-${role}`;el.textContent=text;document.getElementById('chatMsgs').appendChild(el);el.scrollIntoView({behavior:'smooth',block:'end'});return el;}
+function quickChat(msg){document.getElementById('chatInput').value=msg;sendChat();}
+function clearChat(){document.getElementById('chatMsgs').innerHTML='<div class="chat-bubble chat-ai">Hi, I\'m here for you. How can I help?</div>';chatHistory=[];}
+
+// RESOURCES
+async function loadResources(cat) {
+  if(!allResources.length){try{allResources=await apiFetch('/api/resources');}catch(e){return;}}
+  filterRes(cat||'all');
+}
+function filterRes(cat,btn) {
+  document.querySelectorAll('#resFilters .btn').forEach(b=>{b.className='btn btn-ghost';});
+  if(btn)btn.className='btn btn-violet';
+  const list=cat==='all'?allResources:allResources.filter(r=>r.category===cat);
+  document.getElementById('resList').innerHTML=list.map(r=>`<div class="res-card"><span style="font-size:22px;flex-shrink:0">${r.icon||'📌'}</span><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">${r.title}${r.featured?` <span style="font-size:9px;background:var(--violet2);color:var(--violet);padding:2px 7px;border-radius:100px;font-weight:700">Featured</span>`:''}</div><div style="font-size:12px;color:var(--text2)">${r.description||''}</div></div></div>`).join('')||'<div class="empty">No resources in this category</div>';
+}
+
+// NOTIFS
+async function loadNotifs() {
+  try {
+    const d=await apiFetch('/api/user/dashboard');
+    const notifs=d.notifications||[];
+    document.getElementById('notifList').innerHTML=notifs.length?notifs.map(n=>`<div class="notif-item"><div class="nd ${n.read?'read':''}"></div><div><div style="font-size:13px">${n.message}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${kd(n.createdAt)}</div></div></div>`).join(''):'<div class="empty">No notifications</div>';
+    const unread=notifs.filter(n=>!n.read).length, b=document.getElementById('notifBadge'); b.textContent=unread; b.style.display=unread>0?'inline':'none';
+  } catch(e){}
+}
+async function markRead(){try{await apiFetch('/api/user/notifications/read',{method:'PUT'});loadNotifs();toast('All notifications marked as read');}catch(e){}}
+
+// PROFILE
+async function saveProfile(){const name=document.getElementById('pName').value.trim(),bio=document.getElementById('pBio').value.trim();try{await apiFetch('/api/user/profile',{method:'PUT',body:JSON.stringify({name,bio})});toast('Profile saved!');document.getElementById('sbName').textContent=name||currentUser.name;}catch(e){toast(e.message,'err');}}
+async function changePass(){const c=document.getElementById('pCur').value,n=document.getElementById('pNew').value,conf=document.getElementById('pConf').value;if(!c||!n||!conf){toast('Fill all password fields','err');return;}if(n!==conf){toast('New passwords do not match','err');return;}if(n.length<8){toast('Password must be 8+ characters','err');return;}try{await apiFetch('/api/user/password',{method:'PUT',body:JSON.stringify({currentPassword:c,newPassword:n})});toast('Password updated!');['pCur','pNew','pConf'].forEach(id=>document.getElementById(id).value='');}catch(e){toast(e.message,'err');}}
+
+init();
+</script>
+</body>
+</html>
