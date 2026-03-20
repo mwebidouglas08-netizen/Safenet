@@ -1,11 +1,11 @@
 {
   "name": "safenet",
   "version": "1.0.0",
-  "description": "SafeNet — AI-powered cyberbullying detection, analysis and mitigation platform",
+  "description": "SafeNet — AI-powered cyberbullying detection and mitigation",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "build": "echo ok"
   },
   "engines": { "node": "20.x" },
   "dependencies": {
