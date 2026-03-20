@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Dashboard — SafeNet</title>
 <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -391,15 +394,33 @@ async function loadOverview() {
 
 // DETECT
 async function runDetect() {
-  const content=document.getElementById('detContent').value.trim();
-  const platform=document.getElementById('detPlatform').value;
-  if (!content) { toast('Paste some content to analyze','err'); return; }
-  const resultEl=document.getElementById('detResult');
-  resultEl.innerHTML='<div style="font-size:13px;color:var(--text2);padding:8px 0"><span class="spinner"></span>Analyzing with AI...</div>';
+  const contentEl = document.getElementById('detContent');
+  const platformEl = document.getElementById('detPlatform');
+  const content = contentEl.value.trim();
+  const platform = platformEl.value || 'Unknown';
+  if (!content) { toast('Paste some content to analyze', 'err'); return; }
+  const resultEl = document.getElementById('detResult');
+  resultEl.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0"><span class="spinner"></span>Analyzing with AI...</div>';
   try {
-    const d = await apiFetch('/api/detect',{method:'POST',body:JSON.stringify({content,platform})});
-    renderDetectResult(d,resultEl);
-  } catch(e) { resultEl.innerHTML=`<div class="alert alert-err">${e.message}</div>`; }
+    // Raw fetch — no wrapper — to guarantee correct Content-Type
+    const response = await fetch(API + '/api/detect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token()
+      },
+      body: JSON.stringify({ content: content, platform: platform })
+    });
+    const d = await response.json();
+    if (!response.ok) {
+      resultEl.innerHTML = `<div class="alert alert-err">Error ${response.status}: ${d.error || 'Request failed'}</div>`;
+      return;
+    }
+    renderDetectResult(d, resultEl);
+  } catch(e) {
+    resultEl.innerHTML = `<div class="alert alert-err">${e.message}</div>`;
+  }
 }
 
 function renderDetectResult(d,el) {
