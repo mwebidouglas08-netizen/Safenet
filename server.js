@@ -351,13 +351,12 @@ app.get('/api/auth/me', authUser, (req,res) => {
 // ── DETECTION ROUTES ─────────────────────────────
 app.post('/api/detect', optAuth, async (req,res) => {
   try {
-    console.log('🔍 /api/detect called');
-    console.log('   Body:', JSON.stringify(req.body));
-    console.log('   Content-Type:', req.headers['content-type']);
-    const {content,platform} = req.body;
+    console.log('🔍 /api/detect hit — body:', JSON.stringify(req.body), '| content-type:', req.headers['content-type']);
+    const {content, platform} = req.body;
     if (!content || content.trim().length < 3) {
-      console.log('   ❌ Rejected: content too short or missing. content=', content);
-      return res.status(400).json({error:'Content too short to analyze'});
+      return res.status(400).json({
+        error: `Content too short to analyze. Received: "${content}" (type: ${typeof content}). Body was: ${JSON.stringify(req.body)}`
+      });
     }
     const result = await analyzeWithAI(content, platform||'unknown');
     const id = uuidv4();
