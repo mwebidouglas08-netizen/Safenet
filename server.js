@@ -1,4 +1,20 @@
 require('dotenv').config();
+
+// Catch unhandled errors so Railway logs show the real cause
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('❌ Unhandled Rejection:', reason);
+});
+
+console.log('🚀 SafeNet starting...');
+console.log('   Node version:', process.version);
+console.log('   DB_PATH:', process.env.DB_PATH || './safenet.db');
+console.log('   PORT:', process.env.PORT || 3000);
+console.log('   AI enabled:', !!process.env.ANTHROPIC_API_KEY);
 const express   = require('express');
 const cors      = require('cors');
 const bcrypt    = require('bcryptjs');
@@ -33,9 +49,41 @@ app.get('/admin.html',    (req,res) => res.sendFile(path.join(__dirname,'public'
 app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
 // ── DATABASE ────────────────────────────────────
-const db = new Database(process.env.DB_PATH || './safenet.db');
-db.pragma('journal_mode = WAL');
-db.exec(`
+const fs = require('fs');
+const DB_PATH = process.env.DB_PATH || './safenet.db';
+
+// Auto-create directory if it doesn't exist (e.g. /data on Railway)
+try {
+  const dbDir = path.dirname(DB_PATH);
+  if (dbDir && dbDir !== '.' && !fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+    console.log(`✅ Created database directory: ${dbDir}`);
+  }
+} catch(e) {
+  console.warn(`⚠️ Could not create DB directory, using ./safenet.db instead: ${e.message}`);
+}
+
+let db;
+try {
+  db = new Database(DB_PATH);
+  console.log(`✅ Database opened: ${DB_PATH}`);
+} catch(e) {
+  console.error(`❌ Failed to open database at ${DB_PATH}: ${e.message}`);
+  console.log('⚠️ Falling back to in-memory database');
+  try {
+    db = new Database(':memory:');
+    console.log('✅ In-memory database opened');
+  } catch(e2) {
+    console.error('❌ Fatal: cannot open any database:', e2.message);
+    process.exit(1);
+  }
+}
+try {
+  db.pragma('journal_mode = WAL');
+} catch(e) { console.warn('WAL mode not available:', e.message); }
+
+try {
+  db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id          TEXT PRIMARY KEY,
     name        TEXT NOT NULL,
@@ -120,6 +168,11 @@ db.exec(`
     updatedAt TEXT NOT NULL
   );
 `);
+  console.log('✅ Database schema ready');
+} catch(e) {
+  console.error('❌ Schema creation failed:', e.message);
+  process.exit(1);
+}
 
 // Safe column additions
 const addCol = (t,c,tp) => { try { db.prepare(`ALTER TABLE ${t} ADD COLUMN ${c} ${tp}`).run(); } catch {} };
