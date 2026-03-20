@@ -317,15 +317,18 @@ function token() { return localStorage.getItem('sn_token'); }
 function goLogin() { localStorage.removeItem('sn_token'); localStorage.removeItem('sn_user'); window.location.replace('login.html'); }
 
 async function apiFetch(url, opts={}) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + token(),
-    ...(opts.headers || {})
+  const config = {
+    method: opts.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token()
+    }
   };
-  const r = await fetch(API+url, { ...opts, headers });
-  if (r.status===401||r.status===403) { goLogin(); return; }
+  if (opts.body) config.body = opts.body;
+  const r = await fetch(API + url, config);
+  if (r.status === 401 || r.status === 403) { goLogin(); return; }
   const d = await r.json();
-  if (!r.ok) throw new Error(d.error||'Request failed');
+  if (!r.ok) throw new Error(d.error || 'Request failed');
   return d;
 }
 
