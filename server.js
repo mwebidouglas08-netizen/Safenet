@@ -27,13 +27,15 @@ const path      = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+console.log(`🔌 Binding to port ${PORT} on 0.0.0.0`);
 const JWT_SECRET     = process.env.JWT_SECRET     || 'safenet_secret_2026';
 const ANTHROPIC_KEY  = process.env.ANTHROPIC_API_KEY || '';
 
 // ── MIDDLEWARE ──────────────────────────────────
 app.set('trust proxy', 1);
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
 app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Explicit page routes
@@ -349,8 +351,14 @@ app.get('/api/auth/me', authUser, (req,res) => {
 // ── DETECTION ROUTES ─────────────────────────────
 app.post('/api/detect', optAuth, async (req,res) => {
   try {
+    console.log('🔍 /api/detect called');
+    console.log('   Body:', JSON.stringify(req.body));
+    console.log('   Content-Type:', req.headers['content-type']);
     const {content,platform} = req.body;
-    if (!content||content.trim().length<3) return res.status(400).json({error:'Content too short to analyze'});
+    if (!content || content.trim().length < 3) {
+      console.log('   ❌ Rejected: content too short or missing. content=', content);
+      return res.status(400).json({error:'Content too short to analyze'});
+    }
     const result = await analyzeWithAI(content, platform||'unknown');
     const id = uuidv4();
     db.prepare(`INSERT INTO detections (id,userId,content,platform,verdict,severity,confidence,categories,flags,explanation,mitigation,counterNarrative,shouldReport,reportPlatform,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
@@ -531,16 +539,15 @@ app.get('/api/admin/detections', authAdmin, (req,res) => {
 // Catch-all
 app.get('*', (req,res) => res.sendFile(path.join(__dirname,'public','index.html')));
 
-// Start
-app.listen(PORT,'0.0.0.0',() => {
-  console.log(`
-╔══════════════════════════════════════════╗
-║        SAFENET BACKEND RUNNING  🛡️       ║
-╠══════════════════════════════════════════╣
-║  PORT:  ${String(PORT).padEnd(33)}║
-║  Admin: admin@safenet.com / Admin@2024  ║
-╚══════════════════════════════════════════╝
-  `);
+// Start server
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ SafeNet listening on 0.0.0.0:${PORT}`);
+  console.log(`   Admin: admin@safenet.com / Admin@2024`);
+});
+
+server.on('error', (err) => {
+  console.error('❌ Server failed to start:', err.message);
+  process.exit(1);
 });
 
 module.exports = app;
