@@ -19,6 +19,17 @@ app.set('trust proxy', 1);
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Explicit page routes
+app.get('/',              (req,res) => res.sendFile(path.join(__dirname,'public','index.html')));
+app.get('/login',         (req,res) => res.sendFile(path.join(__dirname,'public','login.html')));
+app.get('/register',      (req,res) => res.sendFile(path.join(__dirname,'public','register.html')));
+app.get('/dashboard',     (req,res) => res.sendFile(path.join(__dirname,'public','dashboard.html')));
+app.get('/admin',         (req,res) => res.sendFile(path.join(__dirname,'public','admin.html')));
+app.get('/login.html',    (req,res) => res.sendFile(path.join(__dirname,'public','login.html')));
+app.get('/register.html', (req,res) => res.sendFile(path.join(__dirname,'public','register.html')));
+app.get('/dashboard.html',(req,res) => res.sendFile(path.join(__dirname,'public','dashboard.html')));
+app.get('/admin.html',    (req,res) => res.sendFile(path.join(__dirname,'public','admin.html')));
 app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
 // ── DATABASE ────────────────────────────────────
