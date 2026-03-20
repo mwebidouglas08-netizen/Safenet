@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Create Account — SafeNet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080b12;--bg2:#0e1420;--bg3:#141b28;--card:#0f1620;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--violet:#7c5cfc;--violet2:rgba(124,92,252,0.1);--red:#ff3d5a;--red2:rgba(255,61,90,0.1);--green:#00d48c;--text:#f0f4ff;--text2:#8492b0}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.mesh{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(124,92,252,0.15),transparent);pointer-events:none;z-index:0}
+.wrap{width:100%;max-width:440px;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px;text-decoration:none}
+.lm{width:36px;height:36px;background:linear-gradient(135deg,#7c5cfc,#5b3dd9);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.lm svg{width:20px;height:20px}
+.ln{font-family:'Cabinet Grotesk',sans-serif;font-size:18px;font-weight:900;color:var(--text)}
+.ln span{color:#7c5cfc}
+.card{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:34px}
+.card h1{font-family:'Cabinet Grotesk',sans-serif;font-size:24px;font-weight:900;margin-bottom:6px;letter-spacing:-.5px}
+.card p{font-size:14px;color:var(--text2);margin-bottom:20px}
+.benefits{display:flex;flex-direction:column;gap:7px;margin-bottom:22px;background:rgba(124,92,252,0.05);border:1px solid rgba(124,92,252,0.1);border-radius:10px;padding:14px}
+.benefit{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
+.check{color:var(--green);font-weight:700}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:7px}
+.fc{width:100%;padding:12px 14px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-family:'Instrument Sans',sans-serif;outline:none;transition:.2s}
+.fc:focus{border-color:#7c5cfc}
+.btn{width:100%;padding:13px;border:none;border-radius:11px;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#7c5cfc,#5b3dd9);color:#fff;margin-top:4px;transition:.2s;letter-spacing:-.2px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(124,92,252,.3)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.sw{text-align:center;font-size:14px;color:var(--text2);margin-top:18px}
+.sw a{color:#7c5cfc;text-decoration:none;font-weight:600}
+.err{background:var(--red2);border:1px solid rgba(255,61,90,.25);color:var(--red);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
+</style>
+</head>
+<body>
+<div class="mesh"></div>
+<div class="wrap">
+  <a href="index.html" class="logo"><div class="lm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><span class="ln">Safe<span>Net</span></span></a>
+  <div class="card">
+    <h1>Create your account</h1>
+    <p>Free forever. No credit card required.</p>
+    <div class="benefits">
+      <div class="benefit"><span class="check">✓</span> Unlimited AI cyberbullying detection</div>
+      <div class="benefit"><span class="check">✓</span> Incident reporting with tracking</div>
+      <div class="benefit"><span class="check">✓</span> 24/7 AI support counselor</div>
+      <div class="benefit"><span class="check">✓</span> Personal safety dashboard</div>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="fg"><label>Full name</label><input class="fc" id="name" placeholder="Jane Doe" autofocus></div>
+    <div class="fg"><label>Email</label><input class="fc" id="email" type="email" placeholder="you@email.com"></div>
+    <div class="fg"><label>Password</label><input class="fc" id="pass" type="password" placeholder="Min 8 characters" onkeydown="if(event.key==='Enter')doRegister()"></div>
+    <button class="btn" id="btn" onclick="doRegister()">Create free account →</button>
+    <div class="sw">Already have an account? <a href="login.html">Sign in</a></div>
+  </div>
+</div>
+<script>
+const API = window.location.origin;
+async function doRegister() {
+  const name=document.getElementById('name').value.trim(), email=document.getElementById('email').value.trim(), pass=document.getElementById('pass').value;
+  const err=document.getElementById('err'), btn=document.getElementById('btn');
+  err.style.display='none';
+  if (!name||!email||!pass){err.textContent='Please fill all fields';err.style.display='block';return;}
+  if (pass.length<8){err.textContent='Password must be 8+ characters';err.style.display='block';return;}
+  btn.textContent='Creating account...';btn.disabled=true;
+  try {
+    localStorage.removeItem('sn_token');localStorage.removeItem('sn_user');
+    const r=await fetch(`${API}/api/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    localStorage.setItem('sn_token',d.token);localStorage.setItem('sn_user',JSON.stringify(d.user));
+    window.location.href='dashboard.html';
+  } catch(e){err.textContent=e.message;err.style.display='block';btn.textContent='Create free account →';btn.disabled=false;}
+}
+</script>
+</body>
+</html>
