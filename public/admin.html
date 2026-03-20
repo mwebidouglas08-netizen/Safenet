@@ -167,7 +167,7 @@ let adminToken = localStorage.getItem('sn_admin_token')||'', allReps=[], allDets
 
 function authHeader(){return{'Content-Type':'application/json','Authorization':'Bearer '+adminToken};}
 function doLogout(){localStorage.removeItem('sn_admin_token');adminToken='';document.getElementById('loginWrap').style.display='flex';document.getElementById('dashWrap').style.display='none';}
-async function api(url,opts={}){const r=await fetch(API+url,{headers:authHeader(),...opts});if(r.status===401||r.status===403){doLogout();return;}const d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');return d;}
+async function api(url,opts={}){const headers={...authHeader(),...(opts.headers||{})};const r=await fetch(API+url,{...opts,headers});if(r.status===401||r.status===403){doLogout();return;}const d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');return d;}
 const kd=s=>s?new Date(s).toLocaleDateString('en',{month:'short',day:'numeric',year:'2-digit'}):'—';
 const trunc=(s,n=50)=>s&&s.length>n?s.slice(0,n)+'…':(s||'—');
 
