@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin — SafeNet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080b12;--bg2:#0e1420;--bg3:#141b28;--card:#0f1620;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--violet:#7c5cfc;--violet2:rgba(124,92,252,0.1);--teal:#00e5c8;--teal2:rgba(0,229,200,0.08);--red:#ff3d5a;--red2:rgba(255,61,90,0.1);--amber:#ffb020;--amber2:rgba(255,176,32,0.1);--green:#00d48c;--green2:rgba(0,212,140,0.08);--text:#f0f4ff;--text2:#8492b0;--text3:#3d4d6a;--r:12px}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+h1,h2,h3{font-family:'Cabinet Grotesk',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--violet);border-radius:2px}
+.sb{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:0 16px 16px;border-bottom:1px solid var(--border);margin-bottom:12px;display:flex;align-items:center;gap:9px;text-decoration:none}
+.sb-lm{width:30px;height:30px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.sb-lm svg{width:16px;height:16px}
+.sb-ln{font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:900;color:var(--text)}
+.sb-ln span{color:var(--red)}
+.admin-chip{background:var(--red2);color:var(--red);font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-left:3px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--text2);transition:.15s;border-right:3px solid transparent}
+.sb-item:hover{background:rgba(255,61,90,.04);color:var(--text)}
+.sb-item.active{background:var(--red2);color:var(--red);font-weight:600;border-right-color:var(--red)}
+.sb-item .ic{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:2px 5px;border-radius:100px;font-weight:700}
+.sb-bottom{margin-top:auto;padding:12px}
+.sb-logout{width:100%;padding:8px;background:none;border:1px solid var(--border2);color:var(--text2);border-radius:8px;cursor:pointer;font-size:12px;font-family:'Instrument Sans',sans-serif;transition:.2s}
+.sb-logout:hover{border-color:var(--red);color:var(--red)}
+.main{flex:1;overflow-y:auto;padding:26px 28px}
+.page{display:none}.page.active{display:block}
+.page-title{font-size:20px;font-weight:900;letter-spacing:-.5px;margin-bottom:18px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px;border-left:3px solid var(--sc,var(--violet))}
+.sc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:6px}
+.sc-val{font-family:'Cabinet Grotesk',sans-serif;font-size:26px;font-weight:900;line-height:1}
+.sc-sub{font-size:10px;color:var(--text3);margin-top:3px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:17px;margin-bottom:13px}
+.card-title{font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:800;margin-bottom:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:8px 11px;text-align:left;font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tbl td{padding:9px 11px;border-bottom:1px solid var(--border);font-size:12px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.015)}
+.badge{padding:2px 7px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.b-safe{background:var(--green2);color:var(--green)}.b-low{background:var(--teal2);color:var(--teal)}.b-moderate{background:var(--amber2);color:var(--amber)}.b-severe,.b-critical{background:var(--red2);color:var(--red)}.b-open{background:var(--amber2);color:var(--amber)}.b-resolved{background:var(--green2);color:var(--green)}.b-closed{background:rgba(255,255,255,.05);color:var(--text2)}.b-active{background:var(--green2);color:var(--green)}.b-suspended{background:var(--red2);color:var(--red)}
+.btn{padding:7px 14px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+.btn-violet{background:var(--violet);color:#fff}.btn-red{background:var(--red2);color:var(--red);border:1px solid rgba(255,61,90,.2)}.btn-green{background:var(--green2);color:var(--green);border:1px solid rgba(0,212,140,.2)}.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}.btn-ghost:hover{color:var(--text)}.btn-sm{padding:4px 9px;font-size:11px}
+.filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:.2s;font-family:'Instrument Sans',sans-serif}
+.filter-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+.empty{text-align:center;padding:24px;color:var(--text2);font-size:12px}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.login-card{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:32px;width:100%;max-width:360px}
+.login-card h2{font-family:'Cabinet Grotesk',sans-serif;font-size:22px;font-weight:900;margin-bottom:6px}
+.login-card p{font-size:13px;color:var(--text2);margin-bottom:22px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:5px}
+.fc{width:100%;padding:10px 12px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:'Instrument Sans',sans-serif;outline:none;transition:.2s}
+.fc:focus{border-color:var(--violet)}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--violet),#5b3dd9);color:#fff;border:none;border-radius:9px;font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:.2s}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(124,92,252,.3)}
+.login-err{background:var(--red2);color:var(--red);padding:9px 12px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none}
+.score-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:2px}
+.score-track{background:var(--bg3);border-radius:100px;height:4px;margin-bottom:6px;overflow:hidden}
+.score-fill{height:100%;border-radius:100px}
+@media(max-width:800px){.stats-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}
+@media(max-width:600px){.sb{display:none}.main{padding:14px}}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div style="width:44px;height:44px;background:var(--red);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+    <h2>SafeNet Admin</h2>
+    <p>Sign in to moderate the platform</p>
+    <div class="login-err" id="loginErr"></div>
+    <div class="fg"><label>Email</label><input class="fc" id="lEmail" value="admin@safenet.com" autofocus></div>
+    <div class="fg"><label>Password</label><input class="fc" id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Sign in →</button>
+    <p style="font-size:11px;color:var(--text3);margin-top:10px;text-align:center">Default: admin@safenet.com / Admin@2024</p>
+  </div>
+</div>
+
+<div id="dashWrap" style="display:none;width:100%">
+  <aside class="sb">
+    <a href="index.html" class="sb-logo">
+      <div class="sb-lm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <span class="sb-ln">Safe<span>Net</span><span class="admin-chip">Admin</span></span>
+    </a>
+    <div class="sb-item active" onclick="showPage('dashboard')"><span class="ic">📊</span> Dashboard</div>
+    <div class="sb-item" onclick="showPage('reports')"><span class="ic">📋</span> Reports <span class="sb-badge" id="openBadge" style="display:none">0</span></div>
+    <div class="sb-item" onclick="showPage('detections')"><span class="ic">🔍</span> Detections</div>
+    <div class="sb-item" onclick="showPage('users')"><span class="ic">👥</span> Users</div>
+    <div class="sb-bottom">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:9px;padding:9px;margin-bottom:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:11px;color:#fff">A</div>
+        <div><div style="font-size:12px;font-weight:600">Admin</div><div style="font-size:10px;color:var(--red)">Administrator</div></div>
+      </div>
+      <button class="sb-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="stats-grid">
+        <div class="stat" style="--sc:var(--violet)"><div class="sc-lbl">Total users</div><div class="sc-val" id="st-users">—</div><div class="sc-sub">Registered accounts</div></div>
+        <div class="stat" style="--sc:var(--teal)"><div class="sc-lbl">Total analyses</div><div class="sc-val" id="st-det">—</div><div class="sc-sub">Content checked</div></div>
+        <div class="stat" style="--sc:var(--amber)"><div class="sc-lbl">Open reports</div><div class="sc-val" id="st-open">—</div><div class="sc-sub">Awaiting review</div></div>
+        <div class="stat" style="--sc:var(--red)"><div class="sc-lbl">Critical today</div><div class="sc-val" id="st-crit">—</div><div class="sc-sub">Highest severity</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Verdict breakdown</div>
+          <div id="verdictChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Recent reports</div>
+          <table class="tbl"><thead><tr><th>Ref</th><th>Type</th><th>Platform</th><th>Status</th></tr></thead><tbody id="dashReps"></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">New users</div>
+        <table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Joined</th></tr></thead><tbody id="dashUsers"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="page-title">Incident reports</div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterReps('all',this)">All</button>
+        <button class="filter-btn" onclick="filterReps('open',this)">Open</button>
+        <button class="filter-btn" onclick="filterReps('resolved',this)">Resolved</button>
+        <button class="filter-btn" onclick="filterReps('closed',this)">Closed</button>
+      </div>
+      <table class="tbl"><thead><tr><th>Ref</th><th>Type</th><th>Platform</th><th>Description</th><th>Status</th><th>Priority</th><th>Filed</th><th>Actions</th></tr></thead><tbody id="repsBody"></tbody></table>
+    </div>
+
+    <!-- DETECTIONS -->
+    <div class="page" id="page-detections">
+      <div class="page-title">Content detections</div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterDets('all',this)">All</button>
+        <button class="filter-btn" onclick="filterDets('critical',this)">Critical</button>
+        <button class="filter-btn" onclick="filterDets('severe',this)">Severe</button>
+        <button class="filter-btn" onclick="filterDets('moderate',this)">Moderate</button>
+        <button class="filter-btn" onclick="filterDets('safe',this)">Safe</button>
+      </div>
+      <table class="tbl"><thead><tr><th>Content preview</th><th>Verdict</th><th>Platform</th><th>Harassment</th><th>Threats</th><th>Date</th></tr></thead><tbody id="detsBody"></tbody></table>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="page-title">Users</div>
+      <table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Joined</th><th>Last login</th><th>Actions</th></tr></thead><tbody id="usersBody"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = window.location.origin;
+let adminToken = localStorage.getItem('sn_admin_token')||'', allReps=[], allDets=[];
+
+function authHeader(){return{'Content-Type':'application/json','Authorization':'Bearer '+adminToken};}
+function doLogout(){localStorage.removeItem('sn_admin_token');adminToken='';document.getElementById('loginWrap').style.display='flex';document.getElementById('dashWrap').style.display='none';}
+async function api(url,opts={}){const r=await fetch(API+url,{headers:authHeader(),...opts});if(r.status===401||r.status===403){doLogout();return;}const d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');return d;}
+const kd=s=>s?new Date(s).toLocaleDateString('en',{month:'short',day:'numeric',year:'2-digit'}):'—';
+const trunc=(s,n=50)=>s&&s.length>n?s.slice(0,n)+'…':(s||'—');
+
+async function doLogin(){
+  const email=document.getElementById('lEmail').value, pass=document.getElementById('lPass').value;
+  const err=document.getElementById('loginErr'); err.style.display='none';
+  try {
+    const r=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error);
+    if(d.user.role!=='admin'){err.textContent='Admin access only';err.style.display='block';return;}
+    adminToken=d.token; localStorage.setItem('sn_admin_token',adminToken);
+    showDash();
+  } catch(e){err.textContent=e.message;err.style.display='block';}
+}
+
+function showDash(){document.getElementById('loginWrap').style.display='none';document.getElementById('dashWrap').style.display='flex';loadDashboard();setInterval(loadDashboard,30000);}
+if(adminToken){showDash();}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  event.target.closest('.sb-item')?.classList.add('active');
+  const map={reports:loadReports,detections:loadDetections,users:loadUsers,dashboard:loadDashboard};
+  if(map[name])map[name]();
+}
+
+const vm={safe:'b-safe',low_risk:'b-low',moderate:'b-moderate',severe:'b-severe',critical:'b-critical'};
+const sm={open:'b-open',resolved:'b-resolved',closed:'b-closed'};
+
+async function loadDashboard(){
+  try {
+    const d=await api('/api/admin/stats');
+    document.getElementById('st-users').textContent=d.totalUsers||0;
+    document.getElementById('st-det').textContent=d.totalDetections||0;
+    document.getElementById('st-open').textContent=d.openReports||0;
+    document.getElementById('st-crit').textContent=d.criticalToday||0;
+    const b=document.getElementById('openBadge');b.textContent=d.openReports||0;b.style.display=d.openReports>0?'inline':'none';
+    const total=d.verdictBreakdown.reduce((s,v)=>s+v.c,0)||1;
+    const vc={safe:'#00d48c',low_risk:'#00e5c8',moderate:'#ffb020',severe:'#ff3d5a',critical:'#ff3d5a'};
+    document.getElementById('verdictChart').innerHTML=d.verdictBreakdown.map(v=>{
+      const p=Math.round((v.c/total)*100);
+      return `<div style="margin-bottom:8px"><div class="score-row"><span style="text-transform:capitalize">${(v.verdict||'').replace('_',' ')}</span><span>${v.c} (${p}%)</span></div><div class="score-track"><div class="score-fill" style="width:${p}%;background:${vc[v.verdict]||'#7c5cfc'}"></div></div></div>`;
+    }).join('');
+    document.getElementById('dashReps').innerHTML=(d.recentReports||[]).slice(0,5).map(r=>`<tr><td style="font-family:monospace;font-size:11px;color:var(--violet)">${r.refNumber}</td><td>${trunc(r.incidentType,20)}</td><td style="color:var(--text2)">${r.platform}</td><td><span class="badge ${sm[r.status]||'b-open'}">${r.status}</span></td></tr>`).join('')||'<tr><td colspan="4" class="empty">No reports yet</td></tr>';
+    document.getElementById('dashUsers').innerHTML=(d.recentUsers||[]).slice(0,5).map(u=>`<tr><td style="font-weight:600">${u.name}</td><td style="color:var(--text2)">${u.email}</td><td><span class="badge ${u.status==='active'?'b-active':'b-suspended'}">${u.status}</span></td><td style="color:var(--text2)">${kd(u.createdAt)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No users yet</td></tr>';
+  } catch(e){console.error(e);}
+}
+
+async function loadReports(){
+  try{allReps=await api('/api/admin/reports');renderReps(allReps);}catch(e){}
+}
+function renderReps(list){
+  const pm={low:'b-safe',medium:'b-moderate',high:'b-severe',critical:'b-critical'};
+  document.getElementById('repsBody').innerHTML=list.length?list.map(r=>`<tr>
+    <td style="font-family:monospace;font-size:11px;color:var(--violet)">${r.refNumber}</td>
+    <td>${trunc(r.incidentType,22)}</td>
+    <td style="color:var(--text2)">${r.platform}</td>
+    <td style="color:var(--text2);max-width:180px">${trunc(r.description,45)}</td>
+    <td><span class="badge ${sm[r.status]||'b-open'}">${r.status}</span></td>
+    <td><span class="badge ${pm[r.priority]||'b-moderate'}">${r.priority||'medium'}</span></td>
+    <td style="color:var(--text2)">${kd(r.createdAt)}</td>
+    <td style="display:flex;gap:5px">
+      ${r.status==='open'?`<button class="btn btn-green btn-sm" onclick="updateRep('${r.id}','resolved')">Resolve</button><button class="btn btn-ghost btn-sm" onclick="updateRep('${r.id}','closed')">Close</button>`:'<span style="color:var(--text3);font-size:11px">'+r.status+'</span>'}
+    </td>
+  </tr>`).join(''):`<tr><td colspan="8" class="empty">No reports yet</td></tr>`;
+}
+function filterReps(s,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderReps(s==='all'?allReps:allReps.filter(r=>r.status===s));}
+async function updateRep(id,status){try{await api(`/api/admin/reports/${id}`,{method:'PUT',body:JSON.stringify({status})});loadReports();loadDashboard();}catch(e){alert(e.message);}}
+
+async function loadDetections(){
+  try{allDets=await api('/api/admin/detections');renderDets(allDets);}catch(e){}
+}
+function renderDets(list){
+  document.getElementById('detsBody').innerHTML=list.length?list.map(d=>`<tr>
+    <td style="color:var(--text2);max-width:200px">${trunc(d.content,55)}</td>
+    <td><span class="badge ${vm[d.verdict]||'b-low'}">${(d.verdict||'').replace('_',' ')}</span></td>
+    <td style="color:var(--text2)">${d.platform||'—'}</td>
+    <td style="color:${(d.categories?.direct_harassment||0)>50?'var(--red)':'var(--text2)'}">${d.categories?.direct_harassment||0}%</td>
+    <td style="color:${(d.categories?.threats_violence||0)>50?'var(--red)':'var(--text2)'}">${d.categories?.threats_violence||0}%</td>
+    <td style="color:var(--text2)">${kd(d.createdAt)}</td>
+  </tr>`).join(''):`<tr><td colspan="6" class="empty">No detections yet</td></tr>`;
+}
+function filterDets(v,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDets(v==='all'?allDets:allDets.filter(d=>d.verdict===v));}
+
+async function loadUsers(){
+  try {
+    const users=await api('/api/admin/users');
+    document.getElementById('usersBody').innerHTML=users.length?users.map(u=>`<tr>
+      <td style="font-weight:600">${u.name}</td>
+      <td style="color:var(--text2)">${u.email}</td>
+      <td><span class="badge ${u.status==='active'?'b-active':'b-suspended'}">${u.status}</span></td>
+      <td style="color:var(--text2)">${kd(u.createdAt)}</td>
+      <td style="color:var(--text2)">${kd(u.lastLogin)}</td>
+      <td>${u.status==='active'?`<button class="btn btn-red btn-sm" onclick="setUser('${u.id}','suspended')">Suspend</button>`:`<button class="btn btn-green btn-sm" onclick="setUser('${u.id}','active')">Activate</button>`}</td>
+    </tr>`).join(''):`<tr><td colspan="6" class="empty">No users yet</td></tr>`;
+  } catch(e){}
+}
+async function setUser(id,status){try{await api(`/api/admin/users/${id}`,{method:'PUT',body:JSON.stringify({status})});loadUsers();}catch(e){alert(e.message);}}
+</script>
+</body>
+</html>
